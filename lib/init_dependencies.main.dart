@@ -30,9 +30,13 @@ Future<void> initDependencies() async {
   serviceLocator.registerFactory(() => InternetConnection());
 
   // core
-  serviceLocator.registerLazySingleton(() => AppUserCubit());
+  serviceLocator.registerLazySingleton(
+    () => AppUserCubit(
+      serviceLocator(),
+    ),
+  );
   serviceLocator.registerFactory<ConnectionChecker>(
-        () => ConnectionCheckerImpl(
+    () => ConnectionCheckerImpl(
       serviceLocator(),
     ),
   );
@@ -40,40 +44,46 @@ Future<void> initDependencies() async {
 
 void _initAuth() {
   serviceLocator
-  // Datasource
+    // Datasource
     ..registerFactory<AuthRemoteDataSource>(
-          () => AuthRemoteDataSourceImpl(
+      () => AuthRemoteDataSourceImpl(
         serviceLocator(),
       ),
     )
-  // Repository
+    // Repository
     ..registerFactory<AuthRepository>(
-          () => AuthRepositoryImpl(
+      () => AuthRepositoryImpl(
         serviceLocator(),
         serviceLocator(),
       ),
     )
-  // Use cases
+    // Use cases
     ..registerFactory(
-          () => UserSignUp(
-        serviceLocator(),
-      ),
-    )
-    ..registerFactory(
-          () => UserLogin(
+      () => UserSignUp(
         serviceLocator(),
       ),
     )
     ..registerFactory(
-          () => CurrentUser(
+      () => UserLogin(
         serviceLocator(),
       ),
     )
-  // Bloc
+    ..registerFactory(
+      () => CurrentUser(
+        serviceLocator(),
+      ),
+    )
+    ..registerFactory(
+      () => UserSignOut(
+        serviceLocator(),
+      ),
+    )
+    // Bloc
     ..registerLazySingleton(
-          () => AuthBloc(
+      () => AuthBloc(
         userSignUp: serviceLocator(),
         userLogin: serviceLocator(),
+        userSignOut: serviceLocator(),
         currentUser: serviceLocator(),
         appUserCubit: serviceLocator(),
       ),
@@ -82,39 +92,39 @@ void _initAuth() {
 
 void _initBlog() {
   serviceLocator
-  // Datasource
+    // Datasource
     ..registerFactory<BlogRemoteDataSource>(
-          () => BlogRemoteDataSourceImpl(
+      () => BlogRemoteDataSourceImpl(
         serviceLocator(),
       ),
     )
     ..registerFactory<BlogLocalDataSource>(
-          () => BlogLocalDataSourceImpl(
+      () => BlogLocalDataSourceImpl(
         serviceLocator(),
       ),
     )
-  // Repository
+    // Repository
     ..registerFactory<BlogRepository>(
-          () => BlogRepositoryImpl(
+      () => BlogRepositoryImpl(
         serviceLocator(),
         serviceLocator(),
         serviceLocator(),
       ),
     )
-  // Use cases
+    // Use cases
     ..registerFactory(
-          () => UploadBlog(
+      () => UploadBlog(
         serviceLocator(),
       ),
     )
     ..registerFactory(
-          () => GetAllBlogs(
+      () => GetAllBlogs(
         serviceLocator(),
       ),
     )
-  // Bloc
+    // Bloc
     ..registerLazySingleton(
-          () => BlogBloc(
+      () => BlogBloc(
         uploadBlog: serviceLocator(),
         getAllBlogs: serviceLocator(),
       ),

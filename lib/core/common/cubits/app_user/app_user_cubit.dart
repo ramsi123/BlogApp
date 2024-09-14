@@ -1,4 +1,6 @@
 import 'package:blog_app/core/common/entities/user.dart';
+import 'package:blog_app/core/usecase/usecase.dart';
+import 'package:blog_app/features/auth/domain/usecases/user_sign_out.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -12,7 +14,8 @@ part 'app_user_state.dart';
 /// cubit doesn't work on the concept of events, bloc does. in cubit, you can directly call the function.
 
 class AppUserCubit extends Cubit<AppUserState> {
-  AppUserCubit() : super(AppUserInitial());
+  final UserSignOut userSignOut;
+  AppUserCubit(this.userSignOut) : super(AppUserInitial());
 
   void updateUser(User? user) {
     if (user == null) {
@@ -20,5 +23,15 @@ class AppUserCubit extends Cubit<AppUserState> {
     } else {
       emit(AppUserLoggedIn(user));
     }
+  }
+
+  void signOut() async {
+    emit(AppUserLoading());
+    final res = await userSignOut(NoParams());
+
+    res.fold(
+      (l) => emit(AppUserFailure(l.message)),
+      (r) => emit(AppUserSignOutSuccess()),
+    );
   }
 }

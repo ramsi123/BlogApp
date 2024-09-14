@@ -6,7 +6,6 @@ import 'package:fpdart/fpdart.dart';
 
 class UserSignUp implements Usecase<User, UserSignUpParams> {
   final AuthRepository authRepository;
-
   const UserSignUp(this.authRepository);
 
   @override

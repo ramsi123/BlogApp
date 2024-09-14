@@ -2,6 +2,7 @@ import 'package:blog_app/core/common/cubits/app_user/app_user_cubit.dart';
 import 'package:blog_app/core/common/entities/user.dart';
 import 'package:blog_app/core/usecase/usecase.dart';
 import 'package:blog_app/features/auth/domain/usecases/user_login.dart';
+import 'package:blog_app/features/auth/domain/usecases/user_sign_out.dart';
 import 'package:blog_app/features/auth/domain/usecases/user_sign_up.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,22 +15,26 @@ part 'auth_state.dart';
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final UserSignUp _userSignUp;
   final UserLogin _userLogin;
+  final UserSignOut _userSignOut;
   final CurrentUser _currentUser;
   final AppUserCubit _appUserCubit;
 
   AuthBloc({
     required UserSignUp userSignUp,
     required UserLogin userLogin,
+    required UserSignOut userSignOut,
     required CurrentUser currentUser,
     required AppUserCubit appUserCubit,
   })  : _userSignUp = userSignUp,
         _userLogin = userLogin,
+        _userSignOut = userSignOut,
         _currentUser = currentUser,
         _appUserCubit = appUserCubit,
         super(AuthInitial()) {
     on<AuthEvent>((_, emit) => emit(AuthLoading()));
     on<AuthSignUp>(_onAuthSignUp);
     on<AuthLogin>(_onAuthLogin);
+    on<AuthSignOut>(_onAuthSignOut);
     on<AuthIsUserLoggedIn>(_isUserLoggedIn);
   }
 
@@ -77,6 +82,24 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     res.fold(
       (l) => emit(AuthFailure(l.message)),
       (r) => _emitAuthSuccess(r, emit),
+    );
+  }
+
+  // NOTE: This method is not used because i want to call this method from blog features (blog_page.dart), which is
+  // not permissable due to SOLID / Clean Architectures. Therefore i call the UserSignOut usecase directly from 'app_user_cubit.dart'.
+  // In that way, i can call the signOut function from anywhere.
+  void _onAuthSignOut(
+    AuthSignOut event,
+    Emitter<AuthState> emit,
+  ) async {
+    final res = await _userSignOut(NoParams());
+
+    res.fold(
+      (l) => emit(AuthFailure(l.message)),
+      (r) {
+        _appUserCubit.updateUser;
+        emit(AuthSignOutSuccess());
+      },
     );
   }
 
